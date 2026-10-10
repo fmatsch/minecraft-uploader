@@ -1,0 +1,58 @@
+{
+  "name": "minecraft-uploader",
+  "version": "1.0.0",
+  "description": "Lokale Minecraft-Welten auf einen Server hochladen",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/run.js",
+    "dist:mac": "electron-builder --mac --arm64 --x64",
+    "dist:win": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "ist.fmatsch.minecraftuploader",
+    "productName": "Minecraft Uploader",
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!**/*.node",
+      "!**/build/**",
+      "!**/cpu-features/**"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "artifactName": "minecraft-uploader-macos-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "minecraft-uploader-windows-x64-setup.${ext}"
+    },
+    "npmRebuild": false
+  },
+  "dependencies": {
+    "basic-ftp": "^6.2.3",
+    "prismarine-nbt": "^2.8.0",
+    "ssh2-sftp-client": "^12.1.1"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "license": "MIT",
+  "author": "Florian Matscheko",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fmatsch/minecraft-uploader.git"
+  }
+}

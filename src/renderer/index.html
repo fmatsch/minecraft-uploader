@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'">
+<title>Minecraft Uploader</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><h1>Minecraft Uploader</h1><span class="sub">Lokale Welten → Server</span></header>
+<main>
+  <section class="col" id="worldsCol">
+    <div class="colhead"><h2>1 · Welten</h2>
+      <div><button id="rescan" class="ghost">Neu laden</button><button id="addDir" class="ghost">Ordner hinzufügen…</button></div></div>
+    <div id="dirs" class="hint"></div>
+    <div id="worlds" class="list"></div>
+  </section>
+
+  <section class="col" id="serverCol">
+    <div class="colhead"><h2>2 · Server</h2><button id="newServer" class="ghost">+ Server hinzufügen</button></div>
+    <select id="serverSelect"></select>
+    <div id="serverPanel"></div>
+  </section>
+</main>
+
+<footer id="uploadBar">
+  <div id="summary">Wähle links eine Welt und rechts einen Server.</div>
+  <button id="uploadBtn" class="primary" disabled>Hochladen</button>
+</footer>
+
+<dialog id="serverDlg">
+  <form method="dialog" id="serverForm">
+    <h3 id="dlgTitle">Server hinzufügen</h3>
+    <label>Name<input name="name" required placeholder="Mein Survival-Server"></label>
+    <div class="row">
+      <label>Spiel-Adresse<input name="host" required placeholder="mc.example.de"></label>
+      <label class="narrow">Spiel-Port<input name="gamePort" type="number" value="25565"></label>
+    </div>
+    <h4>Dateizugriff (zum Hochladen)</h4>
+    <label>Protokoll<select name="protocol"><option value="sftp">SFTP</option><option value="ftp">FTP</option><option value="local">Lokaler Ordner</option></select></label>
+    <div class="row" id="netRow">
+      <label>Datei-Host <small>(leer = wie Spiel-Adresse)</small><input name="fileHost"></label>
+      <label class="narrow">Port<input name="filePort" type="number" placeholder="22"></label>
+    </div>
+    <div class="row" id="authRow">
+      <label>Benutzer<input name="user" autocomplete="off"></label>
+      <label>Passwort<input name="password" type="password" autocomplete="new-password" placeholder=""></label>
+    </div>
+    <label class="check" id="ftpsRow"><input type="checkbox" name="ftps"> FTPS (verschlüsselt)</label>
+    <label id="keyRow">SSH-Schlüssel <small>(optional, statt Passwort)</small>
+      <div class="row"><input name="privateKeyPath" readonly><button type="button" id="pickKey" class="ghost">Wählen…</button></div></label>
+    <label>Server-Verzeichnis <small id="dirHint">(Ordner mit server.properties)</small>
+      <div class="row"><input name="remoteDir" value="/" required><button type="button" id="pickDir" class="ghost" hidden>Wählen…</button></div></label>
+    <div class="actions">
+      <button type="button" id="dlgCancel" class="ghost">Abbrechen</button>
+      <button type="submit" class="primary">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="uploadDlg">
+  <h3>Upload</h3>
+  <label>Ordnername auf dem Server<input id="targetName"></label>
+  <label class="check"><input type="checkbox" id="setLevelName"> In <code>server.properties</code> als <code>level-name</code> eintragen</label>
+  <p class="hint">Tipp: Server vor dem Upload stoppen und neu starten, damit die Welt geladen wird.</p>
+  <div id="progressWrap" hidden><progress id="bar" max="1" value="0"></progress><div id="progressText" class="hint"></div></div>
+  <div id="uploadResult"></div>
+  <div class="actions"><button id="uploadCancel" class="ghost">Schließen</button><button id="uploadGo" class="primary">Jetzt hochladen</button></div>
+</dialog>
+<script src="renderer.js"></script>
+</body>
+</html>

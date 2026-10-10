@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minecraft Uploader – Welten auf den Server laden</title>
+<meta name="description" content="Lokale Minecraft-Welten (Java) übersichtlich auswählen und per SFTP, FTP oder lokalem Ordner auf einen Server hochladen – mit Server-Specs und Kompatibilitätsprüfung für macOS und Windows.">
+<meta property="og:title" content="Minecraft Uploader">
+<meta property="og:description" content="Lokale Minecraft-Welten auf einen Server hochladen – mit Kompatibilitätsprüfung.">
+<meta property="og:image" content="https://fmatsch.ist/minecraft-uploader/icon.png">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root {
+    --bg: #f6f5f1; --surface: #ffffff; --text: #1c1b19; --muted: #6b6860;
+    --line: #e4e1d9; --accent: #2563eb; --chip: #efede6;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141413; --surface: #1d1c1a; --text: #f1efe9; --muted: #a19d93;
+      --line: #2e2c29; --accent: #60a5fa; --chip: #272522;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141413; --surface: #1d1c1a; --text: #f1efe9; --muted: #a19d93;
+    --line: #2e2c29; --accent: #60a5fa; --chip: #272522;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  .crumb { padding: 20px 0 0; font-size: 14px; color: var(--muted); }
+  .crumb a { text-decoration: none; }
+  .crumb a:hover { color: var(--accent); }
+
+  .hero { display: flex; gap: 28px; align-items: center; padding: 48px 0 32px; flex-wrap: wrap; }
+  .hero img.icon { width: 112px; height: 112px; border-radius: 26px; box-shadow: var(--shadow); flex: none; }
+  .hero h1 { font-size: clamp(32px, 6vw, 52px); letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 12px; }
+  .hero p { margin: 0; color: var(--muted); font-size: 18px; max-width: 56ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 24px 0 0; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    padding: 11px 20px; border-radius: 12px; font-weight: 600; font-size: 16px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .dl-meta { font-size: 13px; color: var(--muted); margin-top: 10px; min-height: 1.2em; }
+  .dl-all { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .dl-all a { margin-right: 14px; }
+
+  figure { margin: 24px 0 8px; }
+  figure img {
+    display: block; width: 100%; height: auto; border-radius: 14px;
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+  }
+  figure.narrow { max-width: 720px; }
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  h2 {
+    font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin: 56px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  .steps { counter-reset: s; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; padding: 0; margin: 0; list-style: none; }
+  .steps li {
+    counter-increment: s; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); font-size: 15px;
+  }
+  .steps li::before {
+    content: counter(s); display: grid; place-items: center; width: 26px; height: 26px;
+    border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: 13px; margin-bottom: 10px;
+  }
+  .steps b { display: block; margin-bottom: 2px; }
+  .steps span { color: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .card h3 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .note { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 16px 20px; box-shadow: var(--shadow); }
+  .note p { margin: 0 0 10px; } .note p:last-child { margin: 0; }
+  ul.plain { margin: 0; padding-left: 20px; color: var(--muted); }
+  ul.plain li { margin: 6px 0; } ul.plain b { color: var(--text); }
+  code { background: var(--chip); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+
+  footer {
+    border-top: 1px solid var(--line); margin-top: 64px; padding: 28px 0 48px;
+    color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between;
+  }
+  footer a { color: var(--muted); } footer a:hover { color: var(--accent); }
+  @media (max-width: 480px) { .hero { padding-top: 32px; } .hero img.icon { width: 84px; height: 84px; border-radius: 20px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="https://fmatsch.ist/">← fmatsch.ist</a></div>
+
+  <header class="hero">
+    <img class="icon" src="icon.png" alt="" width="112" height="112">
+    <div>
+      <h1>Minecraft Uploader</h1>
+      <p>Wähle eine lokal gespeicherte Minecraft-Welt, verbinde deinen Server und lade sie hoch – die App zeigt vorher, ob die Welt zur Serverversion passt.</p>
+      <div class="actions">
+        <a class="btn primary" id="dl" href="https://github.com/fmatsch/minecraft-uploader/releases/latest">⬇ Herunterladen</a>
+        <a class="btn" id="src" href="https://github.com/fmatsch/minecraft-uploader">Quellcode auf GitHub</a>
+      </div>
+      <div class="dl-meta" id="dl-meta">v1.0.0 · macOS (Apple Silicon und Intel) · Windows · kostenlos, MIT-Lizenz</div>
+      <div class="dl-all" id="dl-all" hidden></div>
+    </div>
+  </header>
+
+  <h2>So läuft es ab</h2>
+  <ol class="steps">
+    <li><b>Welten</b><span>Die App findet alle Java-Welten im Ordner <code>.minecraft/saves</code> – mit Icon, Version, Spielmodus, Größe und letztem Spiel.</span></li>
+    <li><b>Server</b><span>Server hinzufügen (SFTP, FTP oder lokaler Ordner). Die App zeigt Status, Version, Spieler und die Einstellungen aus der <code>server.properties</code>.</span></li>
+    <li><b>Prüfen</b><span>Jede Welt bekommt eine Kompatibilitätsanzeige für den gewählten Server.</span></li>
+    <li><b>Hochladen</b><span>Mit Fortschrittsanzeige; auf Wunsch wird die Welt direkt als <code>level-name</code> eingetragen.</span></li>
+  </ol>
+
+  <h2>Funktionen</h2>
+  <div class="grid">
+    <div class="card"><h3>Kompatibilität</h3><p>Verglichen werden das Weltformat (<code>DataVersion</code> aus der <code>level.dat</code>) und die Version des Servers. Welten, die neuer sind als der Server, werden gesperrt; ältere werden als „wird aktualisiert“ markiert.</p></div>
+    <div class="card"><h3>Server-Specs</h3><p>Online-Status, Antwortzeit, Version, Spielerzahl, MOTD sowie Spielmodus, Schwierigkeit, Sichtweite und Whitelist aus der <code>server.properties</code>.</p></div>
+    <div class="card"><h3>SFTP, FTP oder lokal</h3><p>Zugang per Passwort oder SSH-Schlüssel. Läuft der Server auf demselben Rechner, genügt ein Ordner.</p></div>
+    <div class="card"><h3>Sicher</h3><p>Passwörter werden mit dem Schlüsselbund des Betriebssystems verschlüsselt gespeichert. Der Upload überschreibt nie eine vorhandene Welt auf dem Server.</p></div>
+  </div>
+
+  <h2>Gut zu wissen</h2>
+  <ul class="plain">
+    <li><b>Nur Java Edition.</b> Bedrock-Welten (iPad, Konsole, Windows 10/11 Edition) werden erkannt, aber nicht hochgeladen.</li>
+    <li><b>Server stoppen.</b> Beende den Server vor dem Upload und starte ihn danach neu, damit die Welt geladen wird.</li>
+    <li><b>Neuere Versionen.</b> Mods, Plugins und Datapacks prüft die App nicht. Für sehr neue Minecraft-Versionen muss die Versionstabelle <code>src/lib/versions.js</code> ergänzt werden.</li>
+    <li><b>SmartScreen / Gatekeeper:</b> Die Programme sind nicht code-signiert. Windows zeigt „Weitere Informationen → Trotzdem ausführen“, macOS fragt beim ersten Start (Rechtsklick → Öffnen).</li>
+    <li>Kein offizielles Produkt von Mojang oder Microsoft. „Minecraft“ ist eine Marke von Mojang AB.</li>
+  </ul>
+
+  <footer>
+    <span>© <span id="year">2026</span> Florian Matscheko · MIT-Lizenz</span>
+    <span><a href="https://github.com/fmatsch/minecraft-uploader">GitHub</a> · <a href="https://fmatsch.ist/">fmatsch.ist</a></span>
+  </footer>
+</div>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+  const FILES = [
+    { os: "windows", label: "Windows", name: "minecraft-uploader-windows-x64-setup.exe" },
+    { os: "macos-arm", label: "macOS (Apple Silicon)", name: "minecraft-uploader-macos-arm64.dmg" },
+    { os: "macos-intel", label: "macOS (Intel)", name: "minecraft-uploader-macos-x64.dmg" },
+  ];
+  const ua = (navigator.userAgent || "") + " " + (navigator.platform || "");
+  const mine = /Win/i.test(ua) ? "windows" : /Mac/i.test(ua) ? "macos-arm" : "windows";
+  fetch("https://api.github.com/repos/fmatsch/minecraft-uploader/releases/latest")
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(rel => {
+      const found = FILES.map(f => ({ ...f, asset: (rel.assets || []).find(a => a.name === f.name) })).filter(f => f.asset);
+      if (!found.length) return;
+      const pick = found.find(f => f.os === mine) || found[0];
+      const dl = document.getElementById("dl");
+      dl.href = pick.asset.browser_download_url;
+      dl.textContent = "⬇ Für " + pick.label + " herunterladen";
+      document.getElementById("dl-meta").textContent =
+        `${rel.tag_name} · ${Math.round(pick.asset.size / 1048576)} MB · kostenlos, MIT-Lizenz`;
+      const all = document.getElementById("dl-all");
+      all.replaceChildren("Alle: ", ...found.map(f => Object.assign(document.createElement("a"),
+        { href: f.asset.browser_download_url, textContent: f.label })));
+      all.hidden = false;
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
