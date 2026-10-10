@@ -1,6 +1,6 @@
 {
   "name": "minecraft-uploader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lokale Minecraft-Welten auf einen Server hochladen",
   "main": "src/main.js",
   "scripts": {
